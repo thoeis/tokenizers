@@ -640,6 +640,11 @@ impl Trainer for BpeTrainer {
         self.words = words?;
         Ok(())
     }
+
+    fn feed_with_counter(&mut self, counter: HashMap<String, u32>) -> ()
+    {
+        self.words = counter;
+    }
 }
 
 #[cfg(test)]

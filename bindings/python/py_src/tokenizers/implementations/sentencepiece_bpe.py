@@ -74,6 +74,31 @@ class SentencePieceBPETokenizer(BaseTokenizer):
             files = [files]
         self._tokenizer.train(files, trainer=trainer)
 
+    def train_from_counter(
+        self,
+        counter: Dict[str, int],
+        vocab_size: int = 30000,
+        min_frequency: int = 2,
+        special_tokens: List[Union[str, AddedToken]] = ["<unk>"],
+        limit_alphabet: int = 1000,
+        initial_alphabet: List[str] = [],
+        show_progress: bool = True,
+    ):
+        """Train the model using the given word counts"""
+
+        trainer = trainers.BpeTrainer(
+            vocab_size=vocab_size,
+            min_frequency=min_frequency,
+            special_tokens=special_tokens,
+            limit_alphabet=limit_alphabet,
+            initial_alphabet=initial_alphabet,
+            show_progress=show_progress,
+        )
+        self._tokenizer.train_from_counter(
+            counter,
+            trainer=trainer
+        )
+
     def train_from_iterator(
         self,
         iterator: Union[Iterator[str], Iterator[Iterator[str]]],

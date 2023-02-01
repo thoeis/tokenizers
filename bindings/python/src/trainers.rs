@@ -1,4 +1,5 @@
 use std::sync::{Arc, RwLock};
+use std::collections::{HashMap};
 
 use crate::models::PyModel;
 use crate::tokenizer::PyAddedToken;
@@ -93,6 +94,11 @@ impl Trainer for PyTrainer {
         F: Fn(&str) -> tk::Result<Vec<String>> + Sync,
     {
         self.trainer.write().unwrap().feed(iterator, process)
+    }
+
+    fn feed_with_counter(&mut self, counter: HashMap<String, u32>) -> ()
+    {
+        self.trainer.write().unwrap().feed_with_counter(counter)
     }
 }
 

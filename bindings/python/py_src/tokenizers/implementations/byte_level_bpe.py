@@ -97,6 +97,28 @@ class ByteLevelBPETokenizer(BaseTokenizer):
             files = [files]
         self._tokenizer.train(files, trainer=trainer)
 
+    def train_from_counter(
+        self,
+        counter: Dict[str, int],
+        vocab_size: int = 30000,
+        min_frequency: int = 2,
+        show_progress: bool = True,
+        special_tokens: List[Union[str, AddedToken]] = [],
+    ):
+        """Train the model using the given word counts"""
+
+        trainer = trainers.BpeTrainer(
+            vocab_size=vocab_size,
+            min_frequency=min_frequency,
+            show_progress=show_progress,
+            special_tokens=special_tokens,
+            initial_alphabet=pre_tokenizers.ByteLevel.alphabet(),
+        )
+        self._tokenizer.train_from_counter(
+            counter,
+            trainer=trainer,
+        )
+
     def train_from_iterator(
         self,
         iterator: Union[Iterator[str], Iterator[Iterator[str]]],

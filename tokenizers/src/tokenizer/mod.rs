@@ -175,6 +175,8 @@ pub trait Trainer {
         I: Iterator<Item = S> + Send,
         S: AsRef<str> + Send,
         F: Fn(&str) -> Result<Vec<String>> + Sync;
+    /// Set (pre-processed) word counts directly
+    fn feed_with_counter(&mut self, counter: HashMap<String, u32>) -> ();
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1089,6 +1091,19 @@ where
                 Ok(())
             },
         )??;
+        Ok(self)
+    }
+
+    /// Train our Model from files
+    pub fn train_from_counter<T>(&mut self, trainer: &mut T, counter: HashMap<String, u32>) -> Result<&mut Self>
+    where
+        T: Trainer<Model = M> + Sync,
+    {
+        trainer.feed_with_counter(counter);
+
+        let special_tokens = trainer.train(&mut self.model)?;
+        self.add_special_tokens(&special_tokens);
+
         Ok(self)
     }
 
