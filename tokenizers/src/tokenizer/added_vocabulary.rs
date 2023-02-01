@@ -530,6 +530,10 @@ mod tests {
         {
             unimplemented!()
         }
+        fn feed_with_counter(&mut self, _counter: HashMap<String, u32>) -> ()
+        {
+            unimplemented!()
+        }
     }
 
     impl Model for ModelMock {

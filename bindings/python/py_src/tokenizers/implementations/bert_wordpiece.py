@@ -116,6 +116,39 @@ class BertWordPieceTokenizer(BaseTokenizer):
             files = [files]
         self._tokenizer.train(files, trainer=trainer)
 
+    def train_from_counter(
+        self,
+        counter: Dict[str, int],
+        vocab_size: int = 30000,
+        min_frequency: int = 2,
+        limit_alphabet: int = 1000,
+        initial_alphabet: List[str] = [],
+        special_tokens: List[Union[str, AddedToken]] = [
+            "[PAD]",
+            "[UNK]",
+            "[CLS]",
+            "[SEP]",
+            "[MASK]",
+        ],
+        show_progress: bool = True,
+        wordpieces_prefix: str = "##",
+    ):
+        """Train the model using the given word counts"""
+
+        trainer = trainers.WordPieceTrainer(
+            vocab_size=vocab_size,
+            min_frequency=min_frequency,
+            limit_alphabet=limit_alphabet,
+            initial_alphabet=initial_alphabet,
+            special_tokens=special_tokens,
+            show_progress=show_progress,
+            continuing_subword_prefix=wordpieces_prefix,
+        )
+        self._tokenizer.train_from_counter(
+            counter,
+            trainer=trainer
+        )
+
     def train_from_iterator(
         self,
         iterator: Union[Iterator[str], Iterator[Iterator[str]]],

@@ -1161,6 +1161,37 @@ impl PyTokenizer {
         })
     }
 
+    /// Train the Tokenizer using the provided word counts.
+    ///
+    /// Args:
+    ///     counter (:obj:`PyDict[str, int]`):
+    ///         A dictionary of words with their counts
+    ///
+    ///     trainer (:obj:`~tokenizers.trainers.Trainer`, `optional`):
+    ///         An optional trainer that should be used to train our Model
+    #[args(trainer = "None")]
+    #[pyo3(text_signature = "(self, counter, trainer = None)")]
+    fn train_from_counter(&mut self, counter: &PyDict, trainer: Option<&mut PyTrainer>) -> PyResult<()> {
+        let mut trainer =
+            trainer.map_or_else(|| self.tokenizer.get_model().get_trainer(), |t| t.clone());
+
+        let mut counts = HashMap::<String, u32>::new();
+        for (k, v) in counter.iter() {
+            counts.insert(String::extract(k)?, u32::extract(v)?);
+        }
+
+        Python::with_gil(|py| {
+            py.allow_threads(|| {
+                ToPyResult(
+                    self.tokenizer
+                        .train_from_counter(&mut trainer, counts)
+                        .map(|_| {}),
+                )
+                .into()
+            })
+        })
+    }
+
     /// Train the Tokenizer using the provided iterator.
     ///
     /// You can provide anything that is a Python Iterator

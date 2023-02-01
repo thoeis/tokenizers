@@ -2,7 +2,7 @@ use super::WordPiece;
 use crate::models::bpe::{BpeTrainer, BpeTrainerBuilder, BPE};
 use crate::tokenizer::{AddedToken, Result, Trainer};
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
 
 /// A `WordPieceTrainerBuilder` can be used to create a `WordPieceTrainer` with a custom
 /// configuration.
@@ -195,5 +195,10 @@ impl Trainer for WordPieceTrainer {
         F: Fn(&str) -> Result<Vec<String>> + Sync,
     {
         self.bpe_trainer.feed(iterator, process)
+    }
+
+    fn feed_with_counter(&mut self, counter: HashMap<String, u32>) -> ()
+    {
+        self.bpe_trainer.feed_with_counter(counter)
     }
 }

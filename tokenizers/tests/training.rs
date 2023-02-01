@@ -1,4 +1,7 @@
+use std::collections::HashMap;
+
 use tokenizers::models::bpe::BPE;
+use tokenizers::models::unigram::Unigram;
 use tokenizers::pre_tokenizers::whitespace::Whitespace;
 use tokenizers::{DecoderWrapper, NormalizerWrapper, PostProcessorWrapper, PreTokenizerWrapper};
 use tokenizers::{Model, Tokenizer, TokenizerBuilder};
@@ -57,4 +60,39 @@ fn bpe_continuing_subword_prefix_error() {
     assert_eq!(tokenizer.get_vocab_size(false), 1526);
 
     std::fs::remove_file("tokenizer.json").unwrap();
+}
+
+#[test]
+fn train_unigram_from_counter() {
+    let mut tokenizer = TokenizerBuilder::<
+        Unigram,
+        NormalizerWrapper,
+        PreTokenizerWrapper,
+        PostProcessorWrapper,
+        DecoderWrapper,
+    >::default()
+    .with_model(
+        Unigram::default(),
+    )
+    .with_pre_tokenizer(Some(PreTokenizerWrapper::Whitespace(Whitespace::default())))
+    .build()
+    .unwrap();
+
+    let mut trainer = tokenizer.get_model().get_trainer();
+
+    let mut counter = HashMap::<String, u32>::new();
+    counter.insert("the".to_string(), 100);
+    counter.insert("beginning".to_string(), 50);
+    counter.insert("end".to_string(), 25);
+    counter.insert("ending".to_string(), 25);
+
+    tokenizer
+        .train_from_counter(&mut trainer, counter)
+        .unwrap();
+
+    let model = tokenizer.get_model();
+    let vec = model.encode("end");
+
+    assert!(vec.is_ok());
+    assert_eq!(vec.unwrap().len(), 1);
 }

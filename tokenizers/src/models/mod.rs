@@ -188,6 +188,16 @@ impl Trainer for TrainerWrapper {
             Self::UnigramTrainer(wpt) => wpt.feed(iterator, process),
         }
     }
+
+    fn feed_with_counter(&mut self, counter: HashMap<String, u32>) -> ()
+    {
+        match self {
+            Self::BpeTrainer(bpe) => bpe.feed_with_counter(counter),
+            Self::WordPieceTrainer(wpt) => wpt.feed_with_counter(counter),
+            Self::WordLevelTrainer(wpt) => wpt.feed_with_counter(counter),
+            Self::UnigramTrainer(wpt) => wpt.feed_with_counter(counter),
+        }
+    }
 }
 
 impl_enum_from!(BpeTrainer, TrainerWrapper, BpeTrainer);
