@@ -15,7 +15,7 @@ unigram_tokenizer.normalizer = normalizers.Lowercase()
 dataset = datasets.load_dataset("wikitext", "wikitext-103-raw-v1")
 
 counter = Counter()
-for item in tqdm(dataset["train"].take(10000)):
+for item in tqdm(dataset["train"].select(range(10000))):
     text = unigram_tokenizer.normalizer.normalize_str(item["text"])
     tokens = unigram_tokenizer.pre_tokenizer.pre_tokenize_str(text)
     for w, _ in tokens:
@@ -24,3 +24,7 @@ for item in tqdm(dataset["train"].take(10000)):
 
 # And finally train
 unigram_tokenizer.train_from_counter(counter)
+
+# Test the tokenizer
+e = unigram_tokenizer.encode("Hello World!")
+assert len(e.ids) > 0
