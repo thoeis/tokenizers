@@ -57,6 +57,9 @@ pub struct UnigramTrainer {
     #[builder(default = "None")]
     pub unk_token: Option<String>,
 
+    #[builder(default = "None")]
+    pub with_traits: Option<bool>,
+
     #[builder(default = "16")]
     pub max_piece_length: usize,
     #[builder(default = "1_000_000")]
@@ -171,7 +174,7 @@ impl UnigramTrainer {
             special_tokens.insert(0, (self.unk_token.clone().unwrap(), 0.0));
         }
 
-        Unigram::from(special_tokens.into_iter().chain(pieces).collect(), unk_id)
+        Unigram::from(special_tokens.into_iter().chain(pieces).collect(), unk_id, self.with_traits)
     }
 
     fn required_chars(&self, word_counts: &[Sentence]) -> HashSet<String> {
@@ -504,7 +507,7 @@ impl UnigramTrainer {
         let expected_updates = expected_loops * self.n_sub_iterations as usize;
         self.update_progress(&progress, expected_updates, "EM training");
         let required_chars = self.required_chars(&sentences);
-        let mut new_model = Unigram::from(pieces.clone(), Some(0))?;
+        let mut new_model = Unigram::from(pieces.clone(), Some(0), None)?;
         loop {
             // Sub-EM iteration.
             for _iter in 0..self.n_sub_iterations {
@@ -513,7 +516,7 @@ impl UnigramTrainer {
 
                 // Executes M step.
                 pieces = self.run_m_step(&pieces, &expected);
-                new_model = Unigram::from(pieces.clone(), Some(0))?;
+                new_model = Unigram::from(pieces.clone(), Some(0), None)?;
 
                 // Useful comment for checking compatibility with spm
                 debug!(
@@ -537,7 +540,7 @@ impl UnigramTrainer {
 
             // Prunes pieces.
             pieces = self.prune_sentence_pieces(&new_model, &pieces, &sentences);
-            new_model = Unigram::from(pieces.clone(), Some(0))?;
+            new_model = Unigram::from(pieces.clone(), Some(0), None)?;
         }
         self.finalize_progress(&progress, expected_updates);
 
