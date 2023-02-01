@@ -24,6 +24,7 @@ pub struct Unigram {
     pub(super) unk_id: Option<usize>,
     pub(super) bos_id: usize,
     pub(super) eos_id: usize,
+    pub(super) with_traits: bool,
 
     fuse_unk: bool,
     is_optimized: bool,
@@ -48,6 +49,7 @@ impl Clone for Unigram {
             unk_id: self.unk_id,
             bos_id: self.bos_id,
             eos_id: self.eos_id,
+            with_traits: self.with_traits,
             fuse_unk: self.fuse_unk,
             is_optimized: self.is_optimized,
         }
@@ -59,6 +61,7 @@ impl std::fmt::Debug for Unigram {
         fmt.debug_struct("Unigram")
             .field("vocab", &self.vocab.len())
             .field("unk_id", &self.unk_id)
+            .field("with_traits", &self.with_traits)
             .finish()
     }
 }
@@ -78,7 +81,7 @@ pub enum UnigramError {
 impl Default for Unigram {
     fn default() -> Self {
         let vocab = vec![("<unk>".to_string(), 0.0)];
-        Self::from(vocab, Some(0)).unwrap()
+        Self::from(vocab, Some(0), None).unwrap()
     }
 }
 
@@ -89,7 +92,7 @@ impl Unigram {
     /// unk_id, is the index within the vocabulary.
     /// For now `Unigram` *requires* at least `unk` because we might find a never seen char.
     /// Further versions might allow that part to be hidden.
-    pub fn from(vocab: Vec<(String, f64)>, unk_id: Option<usize>) -> Result<Self> {
+    pub fn from(vocab: Vec<(String, f64)>, unk_id: Option<usize>, with_traits: Option<bool>) -> Result<Self> {
         let n = vocab.len();
         let mut token_to_ids: TokenMap = HashMap::new();
         let mut builder = TrieBuilder::default();
@@ -128,6 +131,7 @@ impl Unigram {
             eos_id,
             unk_id,
             fuse_unk,
+            with_traits: with_traits.unwrap_or(false),
             cache: Cache::default(),
             is_optimized,
         })
@@ -452,7 +456,7 @@ mod tests {
     #[test]
     fn test_populate_nodes_unk() {
         let pieces = vec![("<unk>".to_string(), 0.0)];
-        let model = Unigram::from(pieces, Some(0)).unwrap();
+        let model = Unigram::from(pieces, Some(0), None).unwrap();
 
         let mut lattice = Lattice::from("abc", model.bos_id, model.eos_id);
         model.populate_nodes(&mut lattice);
@@ -477,7 +481,7 @@ mod tests {
             ("ab".to_string(), 0.3),
             ("bc".to_string(), 0.4),
         ];
-        let model = Unigram::from(pieces, Some(0)).unwrap();
+        let model = Unigram::from(pieces, Some(0), None).unwrap();
 
         let mut lattice = Lattice::from("abc", model.bos_id, model.eos_id);
         model.populate_nodes(&mut lattice);
@@ -514,7 +518,7 @@ mod tests {
             ("abcd".to_string(), 10.0),
         ];
 
-        let model = Unigram::from(sentencepieces, Some(0)).unwrap();
+        let model = Unigram::from(sentencepieces, Some(0), None).unwrap();
         let result = model.encode("abcd").unwrap();
         assert_eq!(result, vec!["abcd"]);
     }
@@ -536,7 +540,7 @@ mod tests {
             ("qr".to_string(), -0.5),
         ];
 
-        let mut model = Unigram::from(sentencepieces, Some(0)).unwrap();
+        let mut model = Unigram::from(sentencepieces, Some(0), None).unwrap();
 
         for is_optimized in &[true, false] {
             model.set_optimized(*is_optimized);
