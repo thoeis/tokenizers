@@ -1,3 +1,4 @@
+use std::fs;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
@@ -791,26 +792,57 @@ impl PyWordLevel {
 /// Args:
 ///     vocab (:obj:`List[Tuple[str, float]]`, `optional`):
 ///         A list of vocabulary items and their relative score [("am", -0.2442),...]
+///     unk_id (:obj:`int`, `optional`):
+///         Id of unknown token
+///     with_traits (:obj:`bool`, `optional`):
+///         Use whitespace / case traits
 #[pyclass(extends=PyModel, module = "tokenizers.models", name = "Unigram")]
-#[pyo3(text_signature = "(self, vocab)")]
+#[pyo3(text_signature = "(self, vocab, unk_id, with_traits)")]
 pub struct PyUnigram {}
 
 #[pymethods]
 impl PyUnigram {
     #[new]
-    fn new(vocab: Option<Vec<(String, f64)>>, unk_id: Option<usize>) -> PyResult<(Self, PyModel)> {
-        match (vocab, unk_id) {
-            (Some(vocab), unk_id) => {
-                let model = Unigram::from(vocab, unk_id).map_err(|e| {
+    fn new(vocab: Option<Vec<(String, f64)>>, unk_id: Option<usize>, with_traits: Option<bool>) -> PyResult<(Self, PyModel)> {
+        match (vocab, unk_id, with_traits) {
+            (Some(vocab), unk_id, with_traits) => {
+                let model = Unigram::from(vocab, unk_id, with_traits).map_err(|e| {
                     exceptions::PyException::new_err(format!("Error while loading Unigram: {}", e))
                 })?;
                 Ok((PyUnigram {}, model.into()))
             }
-            (None, None) => Ok((PyUnigram {}, Unigram::default().into())),
+            (None, None, _) => Ok((PyUnigram {}, Unigram::default().into())),
             _ => Err(exceptions::PyValueError::new_err(
                 "`vocab` and `unk_id` must be both specified",
             )),
         }
+    }
+
+    /// Instantiate a Unigram model from the given folder
+    ///
+    /// Args:
+    ///     folder (:obj:`str`):
+    ///         The path to the folder from which to load model file(s)
+    ///     prefix (:obj:`str`, `optional`):
+    ///         An optional prefix, used to prefix each file name
+    /// 
+    /// Returns:
+    ///     :class:`~tokenizers.models.Unigram`: An instance of Unigram loaded from file(s)
+    #[staticmethod]
+    #[pyo3(text_signature = "(folder,prefix)")]
+    fn load<'a>(
+        py: Python,
+        folder: &str,
+        prefix: Option<&'a str>,
+    ) -> PyResult<Py<PyUnigram>> 
+    {
+        let path = Path::new(folder).join(prefix.unwrap_or("").to_owned() + "unigram.json");
+        let data = fs::read_to_string(path)?;
+        let model: Unigram = serde_json::from_str(&data).unwrap();
+        Py::new(
+            py,
+            (PyUnigram {}, model.into())
+        )
     }
 }
 

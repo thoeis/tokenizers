@@ -31,7 +31,7 @@ pub struct Unigram {
 }
 impl PartialEq for Unigram {
     fn eq(&self, other: &Self) -> bool {
-        self.unk_id == other.unk_id && self.vocab == other.vocab
+        self.unk_id == other.unk_id && self.vocab == other.vocab && self.with_traits == other.with_traits
     }
 }
 

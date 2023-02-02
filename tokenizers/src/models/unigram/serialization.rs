@@ -14,6 +14,7 @@ impl Serialize for Unigram {
 
         model.serialize_field("type", "Unigram")?;
         model.serialize_field("unk_id", &self.unk_id)?;
+        model.serialize_field("with_traits", &self.with_traits)?;
         model.serialize_field("vocab", &self.vocab)?;
 
         model.end()
