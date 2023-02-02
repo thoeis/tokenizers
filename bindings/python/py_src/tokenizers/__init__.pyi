@@ -619,7 +619,24 @@ class Regex:
         pass
 
 class Token:
-    pass
+    def __init__(self, id, value, offsets, type_id):
+        pass
+    
+    @property
+    def id(self):
+        pass
+
+    @property
+    def value(self):
+        pass
+
+    @property
+    def offsets(self):
+        pass
+
+    @property
+    def type_id(self):
+        pass
 
 class Tokenizer:
     """

@@ -407,8 +407,12 @@ impl Model for Unigram {
     }
 
     fn tokenize(&self, sentence: &str) -> Result<Vec<Token>> {
+
+        // TODO get traits and set type_id
+
         let str_tokens = self.encode(sentence)?;
         let mut offset = 0;
+        let mut type_id = 0u32;
         let mut tokens = Vec::with_capacity(str_tokens.len());
         for string in str_tokens {
             let id: u32 = match self.token_to_ids.get(&string) {
@@ -418,7 +422,7 @@ impl Model for Unigram {
             let len = string.len();
             let offsets = (offset, offset + len);
             offset += len;
-            tokens.push(Token::new(id, string, offsets));
+            tokens.push(Token::new(id, string, offsets, type_id));
         }
         Ok(tokens)
     }

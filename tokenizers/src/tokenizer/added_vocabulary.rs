@@ -394,7 +394,7 @@ impl AddedVocabulary {
                 if let Some(id) = id {
                     let value = slice.get().to_owned();
                     let len = value.len();
-                    (slice, Some(vec![Token::new(id, value, (0, len))]))
+                    (slice, Some(vec![Token::new(id, value, (0, len), 0)]))
                 } else {
                     (slice, None)
                 }

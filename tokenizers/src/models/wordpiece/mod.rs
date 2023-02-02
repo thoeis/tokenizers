@@ -210,6 +210,7 @@ impl Model for WordPiece {
                     .get(&self.unk_token)
                     .ok_or(Error::MissingUnkToken)?,
                 offsets: (0, sequence.len()),
+                type_id: 0
             }]);
         }
 
@@ -232,6 +233,7 @@ impl Model for WordPiece {
                         id: self.vocab[substr.as_ref()],
                         value: substr.to_string(),
                         offsets: (start, end),
+                        type_id: 0
                     });
                     break;
                 }
@@ -255,6 +257,7 @@ impl Model for WordPiece {
                     .get(&self.unk_token)
                     .ok_or(Error::MissingUnkToken)?,
                 offsets: (0, sequence.len()),
+                type_id: 0
             }])
         } else {
             Ok(sub_tokens)

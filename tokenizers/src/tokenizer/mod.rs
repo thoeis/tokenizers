@@ -184,10 +184,11 @@ pub struct Token {
     pub id: u32,
     pub value: String,
     pub offsets: (usize, usize),
+    pub type_id: u32
 }
 impl Token {
-    pub fn new(id: u32, value: String, offsets: (usize, usize)) -> Self {
-        Self { id, value, offsets }
+    pub fn new(id: u32, value: String, offsets: (usize, usize), type_id: u32) -> Self {
+        Self { id, value, offsets, type_id }
     }
 }
 

@@ -205,12 +205,11 @@ mod tests {
         use crate::Token;
         let encoding = Encoding::from_tokens(
             vec![
-                Token::new(12, "Hello".into(), (0, 5)),
-                Token::new(14, "there".into(), (6, 11)),
-            ],
-            0,
+                Token::new(12, "Hello".into(), (0, 5), 0),
+                Token::new(14, "there".into(), (6, 11), 0),
+            ]
         );
-        let pair = Encoding::from_tokens(vec![Token::new(15, "pair".into(), (0, 4))], 0);
+        let pair = Encoding::from_tokens(vec![Token::new(15, "pair".into(), (0, 4), 0)]);
         let single_encoding = processor.process(encoding.clone(), None, true).unwrap();
         assert_eq!(
             single_encoding,

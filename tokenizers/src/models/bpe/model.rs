@@ -411,7 +411,7 @@ impl BPE {
     fn word_to_tokens<'a, 'b: 'a>(&'a self, word: &'b Word) -> impl Iterator<Item = Token> + 'a {
         word.get_chars_iter()
             .zip(word.get_offsets_iter())
-            .map(move |(id, offsets)| Token::new(id, self.vocab_r[&id].clone(), offsets))
+            .map(move |(id, offsets)| Token::new(id, self.vocab_r[&id].clone(), offsets, 0))
     }
 
     fn tokenize_with_cache(&self, sequence: &str) -> Result<Vec<Token>> {
@@ -542,14 +542,14 @@ mod tests {
             .build()
             .unwrap();
         let tokens = bpe.tokenize("c").unwrap();
-        assert_eq!(tokens, vec![Token::new(0u32, "<unk>".into(), (0, 1)),]);
+        assert_eq!(tokens, vec![Token::new(0u32, "<unk>".into(), (0, 1), 0),]);
 
         let tokens = bpe.tokenize("cc").unwrap();
         assert_eq!(
             tokens,
             vec![
-                Token::new(0u32, "<unk>".into(), (0, 1)),
-                Token::new(0u32, "<unk>".into(), (1, 2)),
+                Token::new(0u32, "<unk>".into(), (0, 1), 0),
+                Token::new(0u32, "<unk>".into(), (1, 2), 0),
             ]
         );
 
@@ -557,10 +557,10 @@ mod tests {
         assert_eq!(
             tokens,
             vec![
-                Token::new(1u32, "a".into(), (0, 1)),
-                Token::new(0u32, "<unk>".into(), (1, 2)),
-                Token::new(0u32, "<unk>".into(), (2, 3)),
-                Token::new(2u32, "b".into(), (3, 4)),
+                Token::new(1u32, "a".into(), (0, 1), 0),
+                Token::new(0u32, "<unk>".into(), (1, 2), 0),
+                Token::new(0u32, "<unk>".into(), (2, 3), 0),
+                Token::new(2u32, "b".into(), (3, 4), 0),
             ]
         );
     }
@@ -577,18 +577,18 @@ mod tests {
             .build()
             .unwrap();
         let tokens = bpe.tokenize("c").unwrap();
-        assert_eq!(tokens, vec![Token::new(0u32, "<unk>".into(), (0, 1)),]);
+        assert_eq!(tokens, vec![Token::new(0u32, "<unk>".into(), (0, 1), 0),]);
 
         let tokens = bpe.tokenize("cc").unwrap();
-        assert_eq!(tokens, vec![Token::new(0u32, "<unk>".into(), (0, 2)),]);
+        assert_eq!(tokens, vec![Token::new(0u32, "<unk>".into(), (0, 2), 0),]);
 
         let tokens = bpe.tokenize("accb").unwrap();
         assert_eq!(
             tokens,
             vec![
-                Token::new(1u32, "a".into(), (0, 1)),
-                Token::new(0u32, "<unk>".into(), (1, 3)),
-                Token::new(2u32, "b".into(), (3, 4)),
+                Token::new(1u32, "a".into(), (0, 1), 0),
+                Token::new(0u32, "<unk>".into(), (1, 3), 0),
+                Token::new(2u32, "b".into(), (3, 4), 0),
             ]
         );
     }
@@ -634,7 +634,7 @@ mod tests {
 
         // With no dropout:
         let tokens = bpe.tokenize("unrelated").unwrap();
-        assert_eq!(tokens, vec![Token::new(15u32, "unrelated".into(), (0, 9))]);
+        assert_eq!(tokens, vec![Token::new(15u32, "unrelated".into(), (0, 9), 0)]);
 
         // Now set dropout to 1.0. Result should be no merges performed.
         bpe.dropout = Some(1.0);
@@ -642,15 +642,15 @@ mod tests {
         assert_eq!(
             tokens,
             vec![
-                Token::new(0u32, "u".into(), (0, 1)),
-                Token::new(1u32, "n".into(), (1, 2)),
-                Token::new(2u32, "r".into(), (2, 3)),
-                Token::new(3u32, "e".into(), (3, 4)),
-                Token::new(4u32, "l".into(), (4, 5)),
-                Token::new(5u32, "a".into(), (5, 6)),
-                Token::new(6u32, "t".into(), (6, 7)),
-                Token::new(3u32, "e".into(), (7, 8)),
-                Token::new(7u32, "d".into(), (8, 9)),
+                Token::new(0u32, "u".into(), (0, 1), 0),
+                Token::new(1u32, "n".into(), (1, 2), 0),
+                Token::new(2u32, "r".into(), (2, 3), 0),
+                Token::new(3u32, "e".into(), (3, 4), 0),
+                Token::new(4u32, "l".into(), (4, 5), 0),
+                Token::new(5u32, "a".into(), (5, 6), 0),
+                Token::new(6u32, "t".into(), (6, 7), 0),
+                Token::new(3u32, "e".into(), (7, 8), 0),
+                Token::new(7u32, "d".into(), (8, 9), 0),
             ]
         );
 
@@ -721,7 +721,8 @@ mod tests {
             vec![Token {
                 id: 3,
                 value: "ab".to_string(),
-                offsets: (0, 2)
+                offsets: (0, 2),
+                type_id: 0
             }]
         );
         let res = bpe.tokenize("abc");
@@ -730,7 +731,8 @@ mod tests {
             vec![Token {
                 id: 4,
                 value: "abc".to_string(),
-                offsets: (0, 3)
+                offsets: (0, 3),
+                type_id: 0
             }]
         );
     }
