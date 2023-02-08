@@ -277,6 +277,20 @@ class Unigram(Model):
             A :obj:`List` of :class:`~tokenizers.Token`: The generated tokens
         """
         pass
+    @staticmethod
+    def load(folder, prefix):
+        """
+        Instantiate a Unigram model from the given folder
+        
+        Args:
+            folder (:obj:`str`):
+                The path to the folder from which to load model file(s)
+            prefix (:obj:`str`, `optional`):
+                An optional prefix, used to prefix each file name
+        
+        Returns:
+            :class:`~tokenizers.models.Unigram`: An instance of Unigram loaded from file(s)
+        """
 
 class WordLevel(Model):
     """
